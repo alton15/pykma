@@ -9,11 +9,12 @@ pykma에만 의존한다. 반대 방향 의존은 없다 — 라이브러리는 
 
 from mcp.server.mcpserver import MCPServer
 
-from pykma import KMA, Forecast, Observation, Precipitation, Sky
+from pykma import KMA, Forecast, Observation, Precipitation, Sky, __version__
 
 __all__ = ["format_forecasts", "format_observation", "main", "mcp"]
 
-mcp = MCPServer("pykma")
+# 버전을 넘겨야 클라이언트의 서버 목록에 뭘 붙였는지가 뜬다. 기본값은 빈 문자열이다.
+mcp = MCPServer("pykma", version=__version__)
 
 _SKY_LABEL = {
     Sky.CLEAR: "맑음",

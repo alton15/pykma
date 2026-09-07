@@ -217,3 +217,11 @@ def test_진입점은_서버를_띄운다(monkeypatch):
 
     # then
     assert ran == [True]
+
+
+def test_서버가_자기_버전을_알린다():
+    # given / when — 비워 두면 클라이언트 서버 목록에 버전이 빈 칸으로 뜬다
+    from pykma import __version__
+
+    # then
+    assert mcp.version == __version__
