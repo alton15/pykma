@@ -14,6 +14,7 @@ TMP, 초단기에서 T1H다. 강수량은 PCP와 RN1이다. 사용자는 .temper
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 from .codes import Amount, Precipitation, Sky, parse_amount, parse_precipitation, parse_sky
 
@@ -93,12 +94,16 @@ def _parse_when(date: str, time: str) -> datetime:
     return datetime.strptime(f"{date}{time}", "%Y%m%d%H%M")
 
 
-def build_observation(items: list[dict[str, str]]) -> Observation:
-    """초단기실황 응답의 행들을 관측 하나로 묶는다."""
+def build_observation(items: list[dict[str, Any]]) -> Observation:
+    """초단기실황 응답의 행들을 관측 하나로 묶는다.
+
+    행의 값이 전부 문자열로 오지는 않는다 — nx·ny는 JSON 숫자다. 경계에서
+    한 번 문자열로 맞춰 두고, 그 아래는 문자열만 다룬다.
+    """
     if not items:
         raise ValueError("기상청 실황 응답에 자료가 없다.")
 
-    raw = {item["category"]: item["obsrValue"] for item in items}
+    raw = {str(item["category"]): str(item["obsrValue"]) for item in items}
     first = items[0]
 
     return Observation(
@@ -114,12 +119,12 @@ def build_observation(items: list[dict[str, str]]) -> Observation:
     )
 
 
-def build_forecasts(items: list[dict[str, str]]) -> list[Forecast]:
+def build_forecasts(items: list[dict[str, Any]]) -> list[Forecast]:
     """예보 응답의 행들을 시간대별로 묶어 시간 순으로 돌려준다."""
     grouped: dict[tuple[str, str], dict[str, str]] = {}
     for item in items:
-        key = (item["fcstDate"], item["fcstTime"])
-        grouped.setdefault(key, {})[item["category"]] = item["fcstValue"]
+        key = (str(item["fcstDate"]), str(item["fcstTime"]))
+        grouped.setdefault(key, {})[str(item["category"])] = str(item["fcstValue"])
 
     forecasts = [
         Forecast(
